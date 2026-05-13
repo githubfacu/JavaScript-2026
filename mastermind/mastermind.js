@@ -12,15 +12,15 @@ async function mastermindApp() {
         const COLORS_OPTIONS = '1. RED\n' + '2. GREEN\n' + '3. BLUE\n' + '4. YELLOW\n' + '5. CYAN\n' + '6. MAGENTA\n'
         let attemps = 5
         let combinationList = [];
-        let combinationResultList = [];
+        let combinationResults = [];
         let currentAttemp = 0
         let winner
         do {
             await getProposedCombination(COLORS_OPTIONS);
-            combinationResultList[currentAttemp] = resolveCombination(combinationList[currentAttemp], SECRET_COMBINATION)
-            winner = winCheck(combinationResultList[currentAttemp])
+            combinationResults[currentAttemp] = resolveCombination(combinationList[currentAttemp], SECRET_COMBINATION)
+            winner = winCheck(combinationResults[currentAttemp])
             console.log(combinationList[currentAttemp]);
-            console.log(combinationResultList[currentAttemp]);
+            console.log(combinationResults[currentAttemp]);
             if (!winner) {
                 attemps = attemps-1
                 currentAttemp = currentAttemp+1;
