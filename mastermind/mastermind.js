@@ -9,14 +9,13 @@ async function mastermindApp() {
     async function playGame(){
         const COLORS = ['RED', 'GREEN', 'BLUE', 'YELLOW', 'CYAN', 'MAGENTA']
         const SECRET_COMBINATION = getSecretCombination(COLORS)
-        const COLORS_OPTIONS = '1. RED\n' + '2. GREEN\n' + '3. BLUE\n' + '4. YELLOW\n' + '5. CYAN\n' + '6. MAGENTA\n'
         let attemps = 5
         let combinationList = [];
         let combinationResults = [];
         let currentAttemp = 0
         let winner
         do {
-            await getProposedCombination(COLORS_OPTIONS);
+            combinationList[currentAttemp] = buildCombination(await getProposedCombination(), COLORS);
             combinationResults[currentAttemp] = resolveCombination(combinationList[currentAttemp], SECRET_COMBINATION)
             winner = winCheck(combinationResults[currentAttemp])
             console.log(combinationList[currentAttemp]);
@@ -40,20 +39,26 @@ async function mastermindApp() {
             return secret
         }
 
+        function buildCombination(combination, colors){
+            let sequence = []
+            for (let i = 0; i < combination.length; i++) {
+                const char = +combination[i]
+                sequence[i] = colors[char-1]
+            }
+            return sequence
+        }
+
         async function getProposedCombination() {
             let error;
             let combination;
             do {
-                combination = await ask(`${COLORS_OPTIONS}Haz tu combinación: `);
+                combination = await ask('1. RED\n' + '2. GREEN\n' + '3. BLUE\n' + '4. YELLOW\n' + '5. CYAN\n' + '6. MAGENTA\n'+ 'Haz tu combinación: ');
                 error = !isValidCombination(combination);
                 if (error) {
                     console.log(`La secuencia no es válida`);
                 }
             } while (error);
-            if (combination) {
-                combination = buildCombination(combination, COLORS)
-                combinationList[currentAttemp] = combination;
-            }
+            return combination
         }
 
         function isValidCombination(combination){
@@ -66,15 +71,6 @@ async function mastermindApp() {
                 }
             }
             return true
-        }
-
-        function buildCombination(combination, colors){
-            let sequence = []
-            for (let i = 0; i < combination.length; i++) {
-                const char = +combination[i]
-                sequence[i] = colors[char-1]
-            }
-            return sequence
         }
 
         function resolveCombination(combination, secret){
@@ -115,7 +111,6 @@ async function mastermindApp() {
         } while (error);
         return result;
     }
-
     rl.close();
 }
 
