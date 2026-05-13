@@ -8,17 +8,16 @@ async function mastermindApp() {
 
     async function playGame(){
         const COLORS = ['RED', 'GREEN', 'BLUE', 'YELLOW', 'CYAN', 'MAGENTA']
-        const SECRET_COMBINATION = secretCombination(COLORS)
-        const COLORS_OPTIONS = '1. RED\n' + '2. GREEN\n' + '3. BLUE\n' + '4. YELLOW\n' + '5. CYAN\n' + '6. MAGENTA'
+        const SECRET_COMBINATION = getSecretCombination(COLORS)
+        const COLORS_OPTIONS = '1. RED\n' + '2. GREEN\n' + '3. BLUE\n' + '4. YELLOW\n' + '5. CYAN\n' + '6. MAGENTA\n'
         let attemps = 5
         let combinationList = [];
         let combinationResultList = [];
         let currentAttemp = 0
         let winner
-
         do {
             await getProposedCombination(COLORS_OPTIONS);
-            resolveCombination(combinationList[currentAttemp], SECRET_COMBINATION)
+            combinationResultList[currentAttemp] = resolveCombination(combinationList[currentAttemp], SECRET_COMBINATION)
             winner = winCheck(combinationResultList[currentAttemp])
             console.log(combinationList[currentAttemp]);
             console.log(combinationResultList[currentAttemp]);
@@ -33,15 +32,19 @@ async function mastermindApp() {
         console.log(`Combinación secreta: ${SECRET_COMBINATION}`);
         console.log('Fin del juego');
 
-        function secretCombination(colors){
-            return [colors[3], colors[2], colors[5], colors[0]]
+        function getSecretCombination(colors){
+            let secret = []
+            for (let i = 0; i < 4; i++) {
+                secret[i] = colors[parseInt(Math.random()*6)]
+            }
+            return secret
         }
 
         async function getProposedCombination() {
             let error;
             let combination;
             do {
-                combination = await ask(`${COLORS_OPTIONS}\nHaz tu combinación: `);
+                combination = await ask(`${COLORS_OPTIONS}Haz tu combinación: `);
                 error = !isValidCombination(combination);
                 if (error) {
                     console.log(`La secuencia no es válida`);
@@ -75,19 +78,18 @@ async function mastermindApp() {
         }
 
         function resolveCombination(combination, secret){
-            let result = []        
-            for (let i = 0; i < secret.length; i++) {
-                for (let j = 0; j < combination.length; j++) {
-                    if (secret[i] === combination[i]) {
-                        result[i] = 'white'
-                    }
-                    else if (secret[i] === combination[j]) {
+            let result = []
+            for (let i = 0; i < combination.length; i++) {
+                for (let j = 0; j < secret.length; j++) {
+                    if (combination[i] === secret[j]) {
                         result[i] = 'black'
+                    }
+                    if (combination[i] === secret[i]) {
+                        result[i] = 'white'
                     }
                 }
             }
-
-            return combinationResultList[currentAttemp] = result
+            return result
         }        
     }
 
@@ -111,9 +113,10 @@ async function mastermindApp() {
                 await ask(`Por favor, responda "si" o "no"`);
             }
         } while (error);
-        rl.close();
         return result;
     }
+
+    rl.close();
 }
 
 mastermindApp();
