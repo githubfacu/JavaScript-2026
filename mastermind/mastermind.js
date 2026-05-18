@@ -9,17 +9,24 @@ async function mastermindApp() {
     async function playGame(){
         const COLORS = ['RED', 'GREEN', 'BLUE', 'YELLOW', 'CYAN', 'MAGENTA']
         const SECRET_COMBINATION = getSecretCombination(COLORS)
+
+        function getSecretCombination(colors){
+            let secret = []
+            for (let i = 0; i < 4; i++) {
+                secret[i] = colors[parseInt(Math.random()*6)]
+            }
+            return secret
+        }
+
         let attemps = 5
-        let combinationList = [];
-        let combinationResults = [];
         let currentAttemp = 0
         let winner
         do {
-            combinationList[currentAttemp] = buildCombination(await getProposedCombination(), COLORS);
-            combinationResults[currentAttemp] = resolveCombination(combinationList[currentAttemp], SECRET_COMBINATION)
-            winner = winCheck(combinationResults[currentAttemp])
-            console.log(combinationList[currentAttemp]);
-            console.log(combinationResults[currentAttemp]);
+            const PROPOSED_COMBINATION = buildCombination(await getProposedCombination(), COLORS)
+            const RESOLVE_PROPOSED_COMBINATION = resolveCombination(PROPOSED_COMBINATION, SECRET_COMBINATION)
+            winner = winCheck(RESOLVE_PROPOSED_COMBINATION)
+            console.log(PROPOSED_COMBINATION);
+            console.log(RESOLVE_PROPOSED_COMBINATION);
             if (!winner) {
                 attemps = attemps-1
                 currentAttemp = currentAttemp+1;
@@ -30,14 +37,6 @@ async function mastermindApp() {
         }
         console.log(`Combinación secreta: ${SECRET_COMBINATION}`);
         console.log('Fin del juego');
-
-        function getSecretCombination(colors){
-            let secret = []
-            for (let i = 0; i < 4; i++) {
-                secret[i] = colors[parseInt(Math.random()*6)]
-            }
-            return secret
-        }
 
         function buildCombination(combination, colors){
             let sequence = []
@@ -73,28 +72,38 @@ async function mastermindApp() {
             return true
         }
 
-        function resolveCombination(combination, secret){
+        function resolveCombination(combination, secret) {
             let result = []
+            let used = [false, false, false, false]
             for (let i = 0; i < combination.length; i++) {
-                for (let j = 0; j < secret.length; j++) {
-                    if (combination[i] === secret[j]) {
-                        result[i] = 'black'
-                    }
-                    if (combination[i] === secret[i]) {
-                        result[i] = 'white'
+                if (combination[i] === secret[i]) {
+                    result[i] = 'white'
+                    used[i] = true
+                }
+            }
+            for (let i = 0; i < combination.length; i++) {
+                if (result[i] !== 'white') {
+                    for (let j = 0; j < secret.length; j++) {
+                        if (used[j] === false) {
+                            if (combination[i] === secret[j]) {
+                                result[i] = 'black'
+                                used[j] = true
+                                break
+                            }
+                        }
                     }
                 }
             }
             return result
-        }        
-    }
-
-    function winCheck(combination){
-        let win = 0
-        for (const element of combination) {
-            win = element === 'white' ? win +1 : win
         }
-        return win === 4
+        
+        function winCheck(combination){
+            let win = 0
+            for (const element of combination) {
+                win = element === 'white' ? win +1 : win
+            }
+            return win === 4
+        }
     }
 
     async function isResumed() {
