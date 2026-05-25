@@ -98,11 +98,11 @@ async function mastermindApp() {
         }
         
         function winCheck(combination){
-            let win = 0
+            let success = 0
             for (const element of combination) {
-                win = element === 'white' ? win +1 : win
+                success = element === 'white' ? success +1 : success
             }
-            return win === 4
+            return success === 4
         }
     }
 

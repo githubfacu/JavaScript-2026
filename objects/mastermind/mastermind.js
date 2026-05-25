@@ -8,57 +8,77 @@ async function mastermindApp() {
 
     async function playGame(){
         let game = initGame()
-        let winner
-
+        await game.secretCombination.setCombination()
         do {
-            buildCombination(await setProposedCombination(), game)
-            resolveCombination(game)
-            winner = winCheck(game)
-            console.log(game.proposedCombination)
-            console.log(game.resolveProposedCombination)
-            if (!winner) {
+            await game.proposedCombination.setCombination()
+            game.attemptResult = resolveCombination(game)
+            console.log(game.proposedCombination.getCombination())
+            console.log(game.attemptResult)
+            if (game.isActive) {
                 game.attemps = game.attemps-1
                 game.currentAttemp = game.currentAttemp+1
             }
-        } while (!winner && game.attemps > 0)
-        if (winner) {
+        } while (!game.winner() || !game.isActive())
+        if (game.winner()) {
             console.log(`HAS GANADO!!!`)
         }
-        console.log(`Combinación secreta: ${game.secretCombination}`)
+        console.log(`Combinación secreta: ${game.secretCombination.getCombination()}`)
         console.log('Fin del juego')
 
         function initGame(){
             let game = {
-                colors: ['RED', 'GREEN', 'BLUE', 'YELLOW', 'CYAN', 'MAGENTA'],
                 attemps: 5,
                 currentAttemp: 0,
-                secretCombination: [],
-                proposedCombination: [],
-                resolveProposedCombination: [],
+                secretCombination: combination(generateSecretCombination),
+                proposedCombination: combination(generateProposedCombination),
+                attemptResult: [],
+                isActive(){
+                    return this.currentAttemp < 5
+                },
+                winner (){
+                    if (this.attemptResult.length === 0) return false
+                    let success = 0
+                    for (const element of this.attemptResult) {
+                        success = element === 'white' ? success +1 : success
+                    }
+                    return success === 4
+                }
             }
-
-            game.secretCombination = setSecretCombination(game.colors)
+            function combination(combinationBuilder){
+                const COLORS = ['RED', 'GREEN', 'BLUE', 'YELLOW', 'CYAN', 'MAGENTA']
+                const BUILDER = combinationBuilder
+                let combination = []
+                
+                return {
+                    async setCombination(){
+                        return combination = await BUILDER(COLORS)
+                    }, 
+                    getCombination(){
+                        return combination
+                    },
+                }
+            }
+            function generateSecretCombination(colors){
+                let secret = []
+                for (let i = 0; i < 4; i++) {
+                    secret[i] = colors[parseInt(Math.random()*6)]
+                }
+                return secret
+            }
             return game
         }
-
-        function setSecretCombination(colors){
-            let secret = []
-            for (let i = 0; i < 4; i++) {
-                secret[i] = colors[parseInt(Math.random()*6)]
-            }
-            return secret
-        }
-
-        function buildCombination(combination, game){
+        
+        async function generateProposedCombination(colors){
+            const combination = await inputCombination()
             let sequence = []
             for (let i = 0; i < combination.length; i++) {
                 const char = +combination[i]
-                sequence[i] = game.colors[char-1]
+                sequence[i] = colors[char-1]
             }
-            return game.proposedCombination = sequence
+            return sequence
         }
 
-        async function setProposedCombination() {
+        async function inputCombination() {
             let error
             let combination
             do {
@@ -68,11 +88,11 @@ async function mastermindApp() {
                     console.log(`La secuencia no es válida`)
                 }
             } while (error)
-            return combination
-        }
-
-        function isValidCombination(combination){
-            if (combination.length !== 4) {
+                return combination
+            }
+            
+            function isValidCombination(combination){
+                if (combination.length !== 4) {
                 return false
             }
             for (const char of combination) {
@@ -82,21 +102,23 @@ async function mastermindApp() {
             }
             return true
         }
-
+        
         function resolveCombination(game) {
+            const secretCombination = game.secretCombination.getCombination()
+            const proposedCombination = game.proposedCombination.getCombination()
             let result = []
             let used = [false, false, false, false]
-            for (let i = 0; i < game.proposedCombination.length; i++) {
-                if (game.proposedCombination[i] === game.secretCombination[i]) {
+            for (let i = 0; i < used.length; i++) {
+                if (proposedCombination[i] === secretCombination[i]) {
                     result[i] = 'white'
                     used[i] = true
                 }
             }
-            for (let i = 0; i < game.proposedCombination.length; i++) {
+            for (let i = 0; i < used.length; i++) {
                 if (result[i] !== 'white') {
-                    for (let j = 0; j < game.secretCombination.length; j++) {
+                    for (let j = 0; j < used.length; j++) {
                         if (used[j] === false) {
-                            if (game.proposedCombination[i] === game.secretCombination[j]) {
+                            if (proposedCombination[i] === secretCombination[j]) {
                                 result[i] = 'black'
                                 used[j] = true
                                 break
@@ -105,19 +127,10 @@ async function mastermindApp() {
                     }
                 }
             }
-            return game.resolveProposedCombination = result
-        }
-        
-        function winCheck(game){
-            const { resolveProposedCombination } = game
-            let win = 0
-            for (const element of resolveProposedCombination) {
-                win = element === 'white' ? win +1 : win
-            }
-            return win === 4
+            return result
         }
     }
-
+    
     async function isResumed() {
         let result
         let answer
