@@ -8,7 +8,6 @@ async function mastermindApp() {
 
     async function playGame(){
         let game = initGame()
-        await game.secretCombination.setCombination()
         do {
             await game.proposedCombination.setCombination()
             game.attemptResult = resolveCombination(game)
@@ -16,10 +15,9 @@ async function mastermindApp() {
             console.log(game.attemptResult)
             if (game.isActive) {
                 game.attemps = game.attemps-1
-                game.currentAttemp = game.currentAttemp+1
             }
-        } while (!game.winner() || !game.isActive())
-        if (game.winner()) {
+        } while (game.isActive())
+        if (game.isWinner()) {
             console.log(`HAS GANADO!!!`)
         }
         console.log(`Combinación secreta: ${game.secretCombination.getCombination()}`)
@@ -28,73 +26,69 @@ async function mastermindApp() {
         function initGame(){
             let game = {
                 attemps: 5,
-                currentAttemp: 0,
                 secretCombination: combination(generateSecretCombination),
                 proposedCombination: combination(generateProposedCombination),
                 attemptResult: [],
                 isActive(){
-                    return this.currentAttemp < 5
+                    return !this.isWinner() && this.attemps > 0
                 },
-                winner (){
-                    if (this.attemptResult.length === 0) return false
+                isWinner(){
                     let success = 0
                     for (const element of this.attemptResult) {
                         success = element === 'white' ? success +1 : success
                     }
-                    return success === 4
+                    return success === this.attemptResult.length
                 }
             }
             function combination(combinationBuilder){
                 const COLORS = ['RED', 'GREEN', 'BLUE', 'YELLOW', 'CYAN', 'MAGENTA']
+                const COMBINATION_LENGTH = 4
                 const BUILDER = combinationBuilder
                 let combination = []
                 
                 return {
                     async setCombination(){
-                        return combination = await BUILDER(COLORS)
+                        return combination = await BUILDER(COLORS, COMBINATION_LENGTH)
                     }, 
                     getCombination(){
                         return combination
                     },
+                    getCombinationLength(){
+                        return COMBINATION_LENGTH
+                    }
                 }
             }
-            function generateSecretCombination(colors){
+            function generateSecretCombination(colors, combinationLength){
                 let secret = []
-                for (let i = 0; i < 4; i++) {
-                    secret[i] = colors[parseInt(Math.random()*6)]
+                for (let i = 0; i < combinationLength; i++) {
+                    secret[i] = colors[parseInt(Math.random()*colors.length)]
                 }
                 return secret
             }
+
+            game.secretCombination.setCombination()
             return game
         }
-        
-        async function generateProposedCombination(colors){
-            const combination = await inputCombination()
+
+        async function generateProposedCombination(colors, combinationLength) {
+            let error
+            let combination
             let sequence = []
-            for (let i = 0; i < combination.length; i++) {
+            do {
+                combination = await ask('1. RED\n' + '2. GREEN\n' + '3. BLUE\n' + '4. YELLOW\n' + '5. CYAN\n' + '6. MAGENTA\n'+ 'Haz tu combinación: ')
+                error = combination.length !== combinationLength || !isValidCombination(combination)
+                if (error) {
+                    console.log(`La secuencia no es válida`)
+                }
+            } while (error)
+            for (let i = 0; i < combinationLength; i++) {
                 const char = +combination[i]
                 sequence[i] = colors[char-1]
             }
             return sequence
         }
 
-        async function inputCombination() {
-            let error
-            let combination
-            do {
-                combination = await ask('1. RED\n' + '2. GREEN\n' + '3. BLUE\n' + '4. YELLOW\n' + '5. CYAN\n' + '6. MAGENTA\n'+ 'Haz tu combinación: ')
-                error = !isValidCombination(combination)
-                if (error) {
-                    console.log(`La secuencia no es válida`)
-                }
-            } while (error)
-                return combination
-            }
-            
-            function isValidCombination(combination){
-                if (combination.length !== 4) {
-                return false
-            }
+        function isValidCombination(combination){
             for (const char of combination) {
                 if (+char < 1 || +char > 6){
                     return false
