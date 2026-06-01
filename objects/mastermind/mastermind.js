@@ -3,7 +3,6 @@ const { ask, rl } = require("../../utils/readline");
 mastermindApp()
 
 async function mastermindApp() {
-
     do {
         await playGame()
     } while (await isResumed())
@@ -12,7 +11,6 @@ async function mastermindApp() {
 }
 
 async function playGame(){
-
     let game = initGame()
     let winner = false
     do {
@@ -82,7 +80,7 @@ async function playGame(){
     function generateSecretCombination(colors, combinationLength){
         let secret = []
         for (let i = 0; i < combinationLength; i++) {
-            secret[i] = colors[parseInt(Math.random()*colors.length)]
+            secret[i] = colors[parseInt(Math.random()*6)]
         }
         return secret
     }

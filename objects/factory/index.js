@@ -45,19 +45,3 @@ object.publicInstanceMethod();
 object.reset();
 object.setName("Juan");
 object.publicInstanceMethod();
-
-
-    async function isResumed() {
-        const VALID_ANSWERS = ['si', 'no']
-        let response
-        let error = false
-        do {
-            response = await ask(`¿Quieres jugar otra partida? `)
-            error = VALID_ANSWERS[response]
-            console.log(error);
-            if (error) {
-                await ask(`Por favor, responda "si" o "no"`)
-            }
-        } while (error)
-        return response
-    }
