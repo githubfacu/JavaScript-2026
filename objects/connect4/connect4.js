@@ -20,12 +20,14 @@ function createConnetc4() {
 
     function gameView() {
         const game = createGame()
-        const board = boardView(game)
+        const board = boardView()
+        const turn = turnView()
         return{
             play(){
-                console.log(':::Inicia juego:::');
+                console.log('::: Inicia juego :::');
                 do {
-                    board.show()
+                    board.show(game.getBoard())
+                    turn.show(game.getCurrentPlayer())
                     game.play()
                 } while (!game.getWinner());
             }
@@ -60,17 +62,16 @@ function createConnetc4() {
         }
     }
 
-    function boardView(game){
+    function boardView(){
         return{
-            show(){
-                console.log('Board: ' + game.getBoard());
-                console.log('Turno jugador: ' + game.getCurrentPlayer().getColor());
+            show(board){
+                console.log('::: Board :::' + board);
             }
         }
     }
 
     function createBoard(){
-        let board = ['1', '2', '3', '4', '5', '6', '7']
+        let board = []
         return {
             getBoard(){
                 return board
@@ -82,10 +83,18 @@ function createConnetc4() {
         const color = tokenColor
         return{
             play(){
-
+                console.log(color +' inserta token');
             },
             getColor(){
                 return color
+            }
+        }
+    }
+
+    function turnView(){
+        return{
+            show(player){
+                console.log('Juega: ' + player.getColor());
             }
         }
     }
