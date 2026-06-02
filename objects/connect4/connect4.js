@@ -1,76 +1,108 @@
 const { ask, rl } = require("../../utils/readline");
 
 (async () => {
-    const connect4Game = await initConnetc4();
+    const connect4Game = createConnetc4();
     await connect4Game.play();
 })();
 
-async function initConnetc4() {
+function createConnetc4() {
 
     return {
         async play(){
-            const resumed = await isResumed()
+            const resumed = confirmationDialog()
             do {
-                const game = await initGame()
+                const game = gameView()
                 game.play()
             } while (await resumed.gameResumed())
             rl.close();
         }
     }
 
-    async function initGame() {
-        const gameMode = await setGameMode()
-        let tokens = []
-        let turn = 0
+    function gameView() {
+        const game = createGame()
+        const board = boardView(game)
+        return{
+            play(){
+                console.log(':::Inicia juego:::');
+                do {
+                    board.show()
+                    game.play()
+                } while (!game.getWinner());
+            }
+        }
+    }
+
+    function createGame() {
+        const players = [createPlayer('Yellow'), createPlayer('Red')]
+        const board = createBoard()
+        const turn = createTurn(players.length)
         let winner
-        
-        async function setGameMode() {
-            let players;
-            do {
-                players = await ask('¿Cuántos jugadores? ');
-                error = players < 0 || 2 < players;
-                if (error) {
-                    console.log(`Por favor escoja entre 0, 1 y 2`)
-                }
-            } while (error);
-            return [
-                ['computer vs computer'],
-                ['player vs computer'],
-                ['player vs player']
-            ][players]
+
+        function winnerCheck(){
+            winner = parseInt(Math.random()*6) === 5
         }
 
         return{
             play(){
-                return console.log('inicia juego');
+                this.getCurrentPlayer().play()
+                winnerCheck()
+                turn.nextTurn()
+            },
+            getBoard(){
+                return board.getBoard()
+            },
+            getCurrentPlayer(){
+                return players[turn.getTurn()]
+            },
+            getWinner(){
+                return winner
             }
         }
     }
 
-    function nextTurn() {
-        const players = []
-        const board = []
+    function boardView(game){
+        return{
+            show(){
+                console.log('Board: ' + game.getBoard());
+                console.log('Turno jugador: ' + game.getCurrentPlayer().getColor());
+            }
+        }
+    }
+
+    function createBoard(){
+        let board = ['1', '2', '3', '4', '5', '6', '7']
         return {
-            getActivePlayer(){
-
+            getBoard(){
+                return board
             }
         }
     }
 
-    function initPlayer(playerType){
-        const color = ''
+    function createPlayer(tokenColor){
+        const color = tokenColor
         return{
             play(){
 
+            },
+            getColor(){
+                return color
             }
         }
     }
 
-    function initBoard(){
-
+    function createTurn(numPlayers) {
+        let turn = 0
+        return {
+            nextTurn(){
+                turn = (turn + 1) % numPlayers;
+            },
+            getTurn(){
+                return turn
+            }
+        }
     }
 
-    async function isResumed() {
+    function confirmationDialog() {
         let result;
         let answer;
         let error = false;
