@@ -6,7 +6,6 @@ async function mastermindApp() {
     do {
         await playGame()
     } while (await isResumed())
-
     rl.close()
 }
 

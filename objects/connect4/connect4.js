@@ -132,6 +132,4 @@ function createConnetc4() {
             } while (error);
         } 
     }
-
-    rl.close();
 }

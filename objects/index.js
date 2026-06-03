@@ -1,4 +1,17 @@
 
+const array = [ 'sa', 're', 'ga', 'ma' ]
+
+let setExample = new Set(array)
+let setExample2 = new Set([ 'sa', 're', 'ga', 'ma' ])
+setExample2.add('pa')
+setExample2.add(['da', 'ni'])
+console.log(setExample);
+console.log(setExample2);
+
+Set.prototype.algo = () => {
+  console.log('algo log');
+}
+
 const o = createObject(7);
 method(o);
 
