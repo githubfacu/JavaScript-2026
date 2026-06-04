@@ -26,9 +26,7 @@ function createConnetc4() {
 
         return {
             async play() {
-                console.log('\n╔═══════════╗');
-                console.log('║ CONNECT 4 ║');
-                console.log('╚═══════════╝');
+                console.log('\n\x1b[32m  CONNECT 4  \x1b[0m');
                 do {
                     board.show(game.getBoard())
                     turn.show(game.getCurrentPlayer().getColor())
@@ -85,8 +83,6 @@ function createConnetc4() {
                         row.map(cell => cell ?? '.').join(' ')
                     );
                 }
-                console.log('═════════════');
-                console.log('1 2 3 4 5 6 7');
                 console.log('═════════════');
             }
         }
@@ -188,6 +184,6 @@ function createConnetc4() {
                     console.log(`Por favor, responda "si" o "no"`);
                 }
             } while (error);
-        } 
+        }
     }
 }
