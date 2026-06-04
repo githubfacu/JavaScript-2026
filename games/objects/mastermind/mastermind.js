@@ -1,4 +1,4 @@
-const { ask, rl } = require("../../utils/readline");
+const { ask, rl } = require("../../../utils/readline");
 
 mastermindApp()
 
