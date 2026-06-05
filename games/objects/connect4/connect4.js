@@ -7,9 +7,20 @@ const { ask, rl } = require("../../../utils/readline");
 
 function createConnetc4() {
 
+    function isResumed() {
+        const dialog = confirmationDialogView()
+
+        return{
+            async gameResumed(){
+                await dialog.read()
+                return dialog.isAffirmative()
+            }
+        }
+    }
+
     return {
         async start(){
-            const resumed = confirmationDialog()
+            const resumed = isResumed()
 
             do {
                 const game = gameView()
@@ -276,27 +287,51 @@ function createConnetc4() {
     }
 
     function confirmationDialog() {
-        let result;
-        let answer;
-        let error = false;
+        const AFFIRMATIVE = 'si'
+        const NEGATIVE = 'no'
+        let answer
 
         return {
-            async gameResumed(){
-                await gameResumedView()
-                return result
+            isAffirmative() {
+                return answer === AFFIRMATIVE
+            },
+            isNegative() {
+                return answer === NEGATIVE
+            },
+            setAnswer(resp) {
+                answer = String(resp).toLowerCase()
+            },
+            getAffirmative(){
+                return AFFIRMATIVE
+            },
+            getNegative(){
+                return NEGATIVE
             }
         }
+    }
 
-        async function gameResumedView() {
-            do {
-                answer = await ask(`¿Quieres jugar otra partida? `)
-                result = answer === `si`;
-                error = !result && answer !== `no`
+    function confirmationDialogView() {
+        const dialog = confirmationDialog()
+        const affirmative = dialog.getAffirmative()
+        const negative = dialog.getNegative()
+        const SUFFIX = `? (` + affirmative + `/` + negative + `): `
+        const MESSAGE = `Por favor, responda ${affirmative} o ${negative}`
 
-                if (error) {
-                    console.log(`Por favor, responda "si" o "no"`)
-                }
-            } while (error)
+        return{
+            async read(){
+                let ok
+                do {
+                    dialog.setAnswer(await ask(SUFFIX))
+                    ok = dialog.isAffirmative() || dialog.isNegative()
+                    if (!ok) {
+                        console.log(MESSAGE)
+                        
+                    }
+                } while (!ok)
+            },
+            isAffirmative() {
+                return dialog.isAffirmative()
+            }
         }
     }
 }
