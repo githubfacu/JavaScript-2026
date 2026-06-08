@@ -1,13 +1,61 @@
 const { ask, rl } = require("../../../utils/readline");
 
+class GameSettings {
+    static RED
+    static YELLOW
+    static NUMBER_PLAYERS
+    #controllablePlayers
+
+    constructor(){
+        this.RED = 'Red'
+        this.YELLOW = 'Yellow'
+        this.NUMBER_PLAYERS = 2
+        this.#controllablePlayers
+    }
+
+    get controllablePlayers (){
+        return this.#controllablePlayers
+    }
+
+    setPlayers(controllablePlayers){
+        this.#controllablePlayers = controllablePlayers
+    }
+}
+
+class SettingsView {
+
+    settings
+
+    constructor(){
+        this.settings = new GameSettings()
+    }
+
+    get settings (){
+        return this.settings
+    }
+
+    async setPlayers (){
+        let gamePlayers;
+        let error
+        do {
+            gamePlayers = await ask('¿Cuántos jugadores? ');
+            error = gamePlayers < 0 || this.settings.NUMBER_PLAYERS < gamePlayers;
+            if (error) {
+                console.log(`Por favor escoja entre 0, 1 y 2`)
+            }
+        } while (error);
+        this.settings.setPlayers(Number(gamePlayers))     
+    }
+}
+
 class GameView {
     #game
     #board
     #turn
     #players
 
-    constructor(settings){
-        this.#game = new Game(settings)
+    constructor(game){
+        this.#game = game
         this.#board = new BoardView()
         this.#turn = new TurnView()        
         this.#players = this.#createPlayerViews()
@@ -64,54 +112,6 @@ class GameView {
     }
 }
 
-class GameSettings {
-    static RED
-    static YELLOW
-    static NUMBER_PLAYERS
-    #controllablePlayers
-
-    constructor(){
-        this.RED = 'Red'
-        this.YELLOW = 'Yellow'
-        this.NUMBER_PLAYERS = 2
-        this.#controllablePlayers
-    }
-
-    get controllablePlayers (){
-        return this.#controllablePlayers
-    }
-
-    setPlayers(controllablePlayers){
-        this.#controllablePlayers = controllablePlayers
-    }
-}
-
-class SettingsView {
-
-    settings
-
-    constructor(){
-        this.settings = new GameSettings()
-    }
-
-    get settings (){
-        return this.settings
-    }
-
-    async setPlayers (){
-        let gamePlayers;
-        let error
-        do {
-            gamePlayers = await ask('¿Cuántos jugadores? ');
-            error = gamePlayers < 0 || 2 < gamePlayers;
-            if (error) {
-                console.log(`Por favor escoja entre 0, 1 y 2`)
-            }
-        } while (error);
-        this.settings.setPlayers(Number(gamePlayers))     
-    }
-}
-
 class Game {
     static players
     static board
@@ -124,7 +124,7 @@ class Game {
         this.settings = settings
         this.players = [
             new Player(settings.RED, settings.controllablePlayers === 0),
-            new Player(settings.YELLOW, settings.controllablePlayers <= 1)
+            new Player(settings.YELLOW, settings.controllablePlayers !== settings.NUMBER_PLAYERS)
         ]
         this.board = new Board()
         this.turn = new Turn(this.settings.NUMBER_PLAYERS)
@@ -172,30 +172,7 @@ class Game {
 class PlayerView {
 
     async play() {
-        let error = false
-        let column
-
-        do {
-            column = await ask('Elije una columna [1 a 7]: ')
-            column = Number(column)
-            error = (
-                Number.isNaN(column) ||
-                column < 1 ||
-                column > 7
-            )
-
-            if (error) {
-                console.log('Por favor, ingresar una columna válida')
-            }
-        } while (error)
-        return column - 1
-    }
-}
-
-class UserPlayerView extends PlayerView{
-
-    constructor(){
-        super()
+        return Math.floor(Math.random() * Board.COLS)
     }
 }
 
@@ -204,27 +181,43 @@ class ComputerPlayerView extends PlayerView{
     constructor(){
         super()
     }
+}
 
+class UserPlayerView extends PlayerView{
+    
+    constructor(){
+        super()
+    }
     async play() {
-        return parseInt(Math.random()*6)
+        let error = false
+        let column
+
+        do {
+            column = await ask('Elije una columna [1 a 7]: ')
+            error = Board.isColumnValid(+column)
+            if (error) {
+                console.log('Por favor, ingresar una columna válida')
+            }
+        } while (error)
+        return +column - 1
     }
 }
 
 class Player{
     #color
-    #isComputer
+    #isComputerPlayer
 
-    constructor(tokenColor, isComputer){
+    constructor(tokenColor, isComputerPlayer){
         this.#color = tokenColor
-        this.#isComputer = isComputer
+        this.#isComputerPlayer = isComputerPlayer
     }
 
     get color() {
         return this.#color
     }
 
-    get isComputer(){
-        return this.#isComputer
+    get isComputerPlayer(){
+        return this.#isComputerPlayer
     }
 }
 
@@ -252,16 +245,18 @@ class BoardView {
 }
 
 class Board {
-    #ROWS = 6
-    #COLS = 7
+    static ROWS = 6
+    static COLS = 7
     board = Array.from(
-        { length: this.#ROWS },
-        () => Array(this.#COLS).fill(null)
+        { length: Board.ROWS },
+        () => Array(Board.COLS).fill(null)
     )
     
-
+    static isColumnValid(column){
+        return column < 1 || column > this.COLS
+    }
     insertToken(column, token) {
-        for (let row = this.#ROWS - 1; row >= 0; row--) {
+        for (let row = Board.ROWS - 1; row >= 0; row--) {
             if (this.board[row][column] === null) {
                 this.board[row][column] = token
 
@@ -400,8 +395,9 @@ class Connect4 {
         do {
             const settings = new SettingsView()
             await settings.setPlayers()
-            const game = new GameView(settings.settings)
-            await game.play()
+            const game = new Game(settings.settings)
+            const gameView = new GameView(game)
+            await gameView.play()
         } while (await this.isResumed())
         rl.close()
     }
