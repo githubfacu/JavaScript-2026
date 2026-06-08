@@ -4,15 +4,23 @@ class GameView {
     #game
     #board
     #turn
-    #player
+    #players
 
-    constructor(){
-        this.#game = new Game(new GameSettings),
-        this.#board = new BoardView(),
-        this.#turn = new TurnView(),
-        this.#player = new PlayerView()
+    constructor(settings){
+        this.#game = new Game(settings)
+        this.#board = new BoardView()
+        this.#turn = new TurnView()        
+        this.#players = this.#createPlayerViews()
     }
 
+    #createPlayerViews() {
+        return this.#game.players.map(player =>
+            player.isComputer
+                ? new ComputerPlayerView()
+                : new UserPlayerView()
+        )
+    }
+    
     #getWinner(){
         return this.#game.getWinner()
     }
@@ -26,7 +34,7 @@ class GameView {
 
         do {
             this.#printBoard()
-            this.#turn.show(this.#game.getCurrentPlayer().getColor())
+            this.#turn.show(this.#game.getCurrentPlayer().color)
 
             let isValid
 
@@ -34,8 +42,8 @@ class GameView {
                 if (isValid === false) {
                     console.log('La columna está llena')
                 }
-
-                const column = await this.#player.play()
+                
+                const column = await this.#players[this.#game.turn.getTurn()].play()
 
                 isValid = this.#game.play(column)
 
@@ -60,11 +68,47 @@ class GameSettings {
     static RED
     static YELLOW
     static NUMBER_PLAYERS
+    #controllablePlayers
 
     constructor(){
         this.RED = 'Red'
         this.YELLOW = 'Yellow'
-        this.NUMBER_PLAYERS = 2;
+        this.NUMBER_PLAYERS = 2
+        this.#controllablePlayers
+    }
+
+    get controllablePlayers (){
+        return this.#controllablePlayers
+    }
+
+    setPlayers(controllablePlayers){
+        this.#controllablePlayers = controllablePlayers
+    }
+}
+
+class SettingsView {
+
+    settings
+
+    constructor(){
+        this.settings = new GameSettings()
+    }
+
+    get settings (){
+        return this.settings
+    }
+
+    async setPlayers (){
+        let gamePlayers;
+        let error
+        do {
+            gamePlayers = await ask('¿Cuántos jugadores? ');
+            error = gamePlayers < 0 || 2 < gamePlayers;
+            if (error) {
+                console.log(`Por favor escoja entre 0, 1 y 2`)
+            }
+        } while (error);
+        this.settings.setPlayers(Number(gamePlayers))     
     }
 }
 
@@ -79,10 +123,10 @@ class Game {
     constructor(settings){
         this.settings = settings
         this.players = [
-            new Player(this.settings.RED), 
-            new Player(this.settings.YELLOW)
-        ],
-        this.board = new Board(),
+            new Player(settings.RED, settings.controllablePlayers === 0),
+            new Player(settings.YELLOW, settings.controllablePlayers <= 1)
+        ]
+        this.board = new Board()
         this.turn = new Turn(this.settings.NUMBER_PLAYERS)
     }
     
@@ -92,7 +136,7 @@ class Game {
 
     play(column) {
         const currentPlayer = this.getCurrentPlayer()
-        const token = currentPlayer.getColor()
+        const token = currentPlayer.color
         const position = this.board.insertToken(
             column,
             token
@@ -148,15 +192,39 @@ class PlayerView {
     }
 }
 
-class Player{
-    #color
+class UserPlayerView extends PlayerView{
 
-    constructor(tokenColor){
-        this.#color = tokenColor
+    constructor(){
+        super()
+    }
+}
+
+class ComputerPlayerView extends PlayerView{
+
+    constructor(){
+        super()
     }
 
-    getColor() {
+    async play() {
+        return parseInt(Math.random()*6)
+    }
+}
+
+class Player{
+    #color
+    #isComputer
+
+    constructor(tokenColor, isComputer){
+        this.#color = tokenColor
+        this.#isComputer = isComputer
+    }
+
+    get color() {
         return this.#color
+    }
+
+    get isComputer(){
+        return this.#isComputer
     }
 }
 
@@ -330,7 +398,9 @@ class Connect4 {
 
     async start() {
         do {
-            const game = new GameView()
+            const settings = new SettingsView()
+            await settings.setPlayers()
+            const game = new GameView(settings.settings)
             await game.play()
         } while (await this.isResumed())
         rl.close()
