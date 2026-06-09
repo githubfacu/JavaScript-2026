@@ -1,24 +1,21 @@
 const { ask, rl } = require("../../../utils/readline");
 
 class GameSettings {
-    static RED
-    static YELLOW
-    static NUMBER_PLAYERS
-    #controllablePlayers
+    static RED = 'Red'
+    static YELLOW = 'Yellow'
+    static NUMBER_PLAYERS = 2
+    #numberControllablePlayers
 
     constructor(){
-        this.RED = 'Red'
-        this.YELLOW = 'Yellow'
-        this.NUMBER_PLAYERS = 2
-        this.#controllablePlayers
+        this.#numberControllablePlayers
     }
 
-    get controllablePlayers (){
-        return this.#controllablePlayers
+    get numberControllablePlayers (){
+        return this.#numberControllablePlayers
     }
 
     setPlayers(controllablePlayers){
-        this.#controllablePlayers = controllablePlayers
+        this.#numberControllablePlayers = controllablePlayers
     }
 }
 
@@ -28,10 +25,6 @@ class SettingsView {
 
     constructor(){
         this.settings = new GameSettings()
-    }
-
-    get settings (){
-        return this.settings
     }
 
     async setPlayers (){
@@ -52,21 +45,23 @@ class GameView {
     #game
     #board
     #turn
-    #players
 
     constructor(game){
         this.#game = game
         this.#board = new BoardView()
-        this.#turn = new TurnView()        
-        this.#players = this.#createPlayerViews()
+        this.#turn = new TurnView()
+    }
+    
+    async interact(){
+        return this.#game.getCurrentPlayer().accept(this)
     }
 
-    #createPlayerViews() {
-        return this.#game.players.map(player =>
-            player.isComputer
-                ? new ComputerPlayerView()
-                : new UserPlayerView()
-        )
+    visitComputerPlayer(computerPlayer){
+        return new ComputerPlayerView(computerPlayer).play()
+    }
+    
+    visitUserPlayer(userPlayer){
+        return new UserPlayerView(userPlayer).play()
     }
     
     #getWinner(){
@@ -82,7 +77,6 @@ class GameView {
 
         do {
             this.#printBoard()
-            this.#turn.show(this.#game.getCurrentPlayer().color)
 
             let isValid
 
@@ -91,7 +85,7 @@ class GameView {
                     console.log('La columna está llena')
                 }
                 
-                const column = await this.#players[this.#game.turn.getTurn()].play()
+                const column = await this.interact()
 
                 isValid = this.#game.play(column)
 
@@ -113,53 +107,67 @@ class GameView {
 }
 
 class Game {
-    static players
-    static board
-    static turn
+    #players
+    #board
+    #turn
     #winner = null
     #draw = false
     settings
 
     constructor(settings){
         this.settings = settings
-        this.players = [
-            new Player(settings.RED, settings.controllablePlayers === 0),
-            new Player(settings.YELLOW, settings.controllablePlayers !== settings.NUMBER_PLAYERS)
+        this.#board = new Board()
+        this.#turn = new Turn()
+        this.#players = []
+        this.reset(settings.numberControllablePlayers)
+    }
+
+    reset(userPlayers) {
+        const colors = [
+            GameSettings.RED,
+            GameSettings.YELLOW
         ]
-        this.board = new Board()
-        this.turn = new Turn(this.settings.NUMBER_PLAYERS)
+
+        for (let i = 0; i < GameSettings.NUMBER_PLAYERS; i++) {
+            const color = colors[i]
+
+            this.#players[i] =
+                i < userPlayers
+                    ? new UserPlayer(color, this.#board)
+                    : new ComputerPlayer(color, this.#board)
+        }
     }
     
-    drawCheck() {
-        this.#draw = this.board.isComplete()
+    #drawCheck() {
+        this.#draw = this.#board.isComplete()
     }
 
     play(column) {
         const currentPlayer = this.getCurrentPlayer()
         const token = currentPlayer.color
-        const position = this.board.insertToken(
+        const position = this.#board.insertToken(
             column,
             token
         )
         if (!position) {
             return false
         }
-        if (this.board.isConnect4(position, token)) {
+        if (this.#board.isConnect4(position, token)) {
             this.#winner = token
         }
         if (!this.#winner) {
-            this.drawCheck()
+            this.#drawCheck()
         }
         if (!this.#winner && !this.#draw) {
-            this.turn.nextTurn()
+            this.#turn.nextTurn()
         }
         return true
     }
     getBoard() {
-        return this.board.getBoard()
+        return this.#board.getBoard()
     }
     getCurrentPlayer() {
-        return this.players[this.turn.getTurn()]
+        return this.#players[this.#turn.getTurn()]
     }
     getWinner() {
         return this.#winner
@@ -171,26 +179,39 @@ class Game {
 
 class PlayerView {
 
+    player
+
+    constructor(player){
+        this.player = player
+    }
+
     async play() {
-        return Math.floor(Math.random() * Board.COLS)
+        throw Error('Abstract class, astract method')
     }
 }
 
 class ComputerPlayerView extends PlayerView{
 
-    constructor(){
-        super()
+    constructor(player){
+        super(player)
+    }
+
+    async play() {
+        console.log(this.player.color);
+        return Math.floor(Math.random() * Board.COLS)
     }
 }
 
 class UserPlayerView extends PlayerView{
     
-    constructor(){
-        super()
+    constructor(player){
+        super(player)
     }
+
     async play() {
         let error = false
         let column
+        console.log(this.player.color);
 
         do {
             column = await ask('Elije una columna [1 a 7]: ')
@@ -205,19 +226,37 @@ class UserPlayerView extends PlayerView{
 
 class Player{
     #color
-    #isComputerPlayer
 
-    constructor(tokenColor, isComputerPlayer){
+    constructor(tokenColor){
         this.#color = tokenColor
-        this.#isComputerPlayer = isComputerPlayer
     }
 
     get color() {
         return this.#color
     }
 
-    get isComputerPlayer(){
-        return this.#isComputerPlayer
+    accept(visitor){}
+}
+
+class UserPlayer extends Player {
+
+    constructor(color) {
+        super(color)
+    }
+
+    accept(visitor){
+        return visitor.visitUserPlayer(this)
+    }
+}
+
+class ComputerPlayer extends Player {
+
+    constructor(color) {
+        super(color)
+    }
+
+    accept(visitor){
+        return visitor.visitComputerPlayer(this)
     }
 }
 
@@ -321,15 +360,14 @@ class TurnView{
 }
 
 class Turn{
-    #turn = 0
-    #numPlayers
+    #turn
 
-    constructor(numPlayers){
-        this.#numPlayers = numPlayers
+    constructor(){
+        this.#turn = 0
     }
 
     nextTurn() {
-        this.#turn = (this.#turn + 1) % this.#numPlayers
+        this.#turn = (this.#turn + 1) % GameSettings.NUMBER_PLAYERS
     }
     getTurn() {
         return this.#turn
