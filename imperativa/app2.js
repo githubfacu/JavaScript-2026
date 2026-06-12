@@ -1,4 +1,4 @@
-const { ask, rl } = require('../utils/readline');
+import { ask, rl } from "../utils/readline.js"
 
 async function power() {
   const num = await ask('Introduce el numerador de la fracción: ');

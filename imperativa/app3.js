@@ -1,4 +1,4 @@
-const { ask, rl } = require('../utils/readline');
+import { ask, rl } from "../utils/readline.js";
 
 async function interval() {
   const min = await ask('Introduce el mínimo del intervalo: ');

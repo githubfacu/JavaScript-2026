@@ -1,11 +1,10 @@
-const { ask, rl } = require('../../utils/readline');
+import { ask, rl } from "../../utils/readline.js";
 
-const { SUBREGIONS } = require('./data/subregions')
-const { REGIONS } = require('./data/regions')
+import { SUBREGIONS } from './data/subregions.js'
+import { REGIONS } from './data/regions.js'
 
 async function continentsApp(){
 
-    
     rl.close();
 }
 

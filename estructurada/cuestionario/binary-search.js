@@ -1,4 +1,4 @@
-const { ask, rl } = require('../../utils/readline');
+import { ask, rl } from "../../utils/readline.js";
 
 async function binarySearch() {
   const num = await ask('Introduce un núnero entre 0 y 1.000.000: ');

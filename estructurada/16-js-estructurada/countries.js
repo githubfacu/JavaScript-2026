@@ -1,6 +1,6 @@
-const { ask, rl } = require('../../utils/readline');
+import { ask, rl } from "../../utils/readline.js"
 
-const { NAMES : countries } = require('./data/names')
+import { NAMES as countries } from './data/names.js'
 
 async function countriesApp(){
 

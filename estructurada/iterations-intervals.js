@@ -1,21 +1,21 @@
-const { ask, rl } = require('../utils/readline');
+import { ask, rl } from "../utils/readline.js";
 
 async function intervalSplit() {
-  const min = await ask('Dame el mínimo: ');
-  const max = await ask('Dame el máximo: ');
-  const parts = await ask('Dame el número de partes: ');
+  const MIN = await ask('Dame el mínimo: ');
+  const MAX = await ask('Dame el máximo: ');
+  const PARTS = await ask('Dame el número de partes: ');
 
-  minInt = +min,
-  maxInt = +max,
-  partsInt = +parts
+  const MIN_INT = +MIN
+  const MAX_INT = +MAX
+  const PARTS_INT = +PARTS
 
-  const intervalLong = (maxInt - minInt) / partsInt;
-  let initialValue = minInt
+  const INTERVAL_LONG = (MAX_INT - MIN_INT) / PARTS_INT;
+  let initialValue = MIN_INT
   
-  for (let index = 0; index < partsInt; index++) {
-    const intervalEndValue = initialValue+intervalLong
-    console.log(`[${ initialValue }, ${ intervalEndValue }]`);
-    initialValue=intervalEndValue
+  for (let index = 0; index < PARTS_INT; index++) {
+    const INTERVAL_END_VALUE = initialValue+INTERVAL_LONG
+    console.log(`[${ initialValue }, ${ INTERVAL_END_VALUE }]`);
+    initialValue=INTERVAL_END_VALUE
   }
 
   rl.close();
