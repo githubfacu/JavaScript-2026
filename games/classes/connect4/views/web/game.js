@@ -6,7 +6,7 @@ export class GameView {
     #game
     #board
     #turn
-    #gameElement
+    #gameComponent
     #gameInfo
     #gameMessage
 
@@ -14,7 +14,7 @@ export class GameView {
         this.#game = game
         this.#board = new BoardView()
         this.#turn = new TurnView()
-        this.#gameElement = document.getElementById('game')
+        this.#gameComponent = document.getElementById('game')
         this.#gameInfo = document.getElementById('game_info')
         this.#gameMessage = document.getElementById('game_message')
         this.#gameMessage.style.display = 'block'
@@ -37,20 +37,16 @@ export class GameView {
         return this.#game.getWinner()
     }
 
-    #printBoard(){
-        return this.#board.render(this.#game.getBoard())
-    }
-
     async render() {
         while (!this.#game.getWinner() && !this.#game.getDraw()) {
-            this.#gameElement.replaceChildren();
+            this.#gameComponent.replaceChildren();
             this.#gameMessage.replaceChildren();
 
             this.#gameMessage.appendChild(
                 this.#turn.render(this.#game.getTurn(), true)
             );
 
-            this.#gameElement.appendChild(
+            this.#gameComponent.appendChild(
                 this.#board.render(this.#game.getBoard())
             );
 
@@ -58,9 +54,9 @@ export class GameView {
             this.#game.play(column);
         }
 
-        this.#gameElement.replaceChildren();
+        this.#gameComponent.replaceChildren();
 
-        this.#gameElement.appendChild(
+        this.#gameComponent.appendChild(
             this.#board.render(this.#game.getBoard())
         );
 
