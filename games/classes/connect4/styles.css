@@ -1,0 +1,173 @@
+
+body{
+    margin: 0;
+    height: 100vh;
+    color: white;
+    background-color: rgb(18, 18, 82);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header{
+    padding: 16px;
+    background-color: rgb(0, 0, 61);
+}
+
+.title{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.main{
+    padding: 32px;
+    max-width: 1420px;
+    margin: auto;
+}
+
+.settings_container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.settings_container p{
+    font-weight: 500;
+}
+
+.settings_buttons_container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.settings_container button{
+    padding: 16px;
+    border-radius: 360px;
+    font-weight: bold;
+}
+
+.settings_container button:hover{
+    background-color: rgb(210, 210, 210);
+}
+
+.game_info{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.game_message{
+    display: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    color: white;
+    border: 1px solid white;
+    font-size: 400;
+    width: 150px;
+}
+
+.reset_button{
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    background-color: rgb(57, 0, 97);
+    color: white;
+    border: 1px solid rgb(101, 0, 174);
+    font-weight: bold;
+}
+
+.reset_button:hover{
+    background-color: rgb(101, 0, 174);
+}
+
+.game_container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.board_container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.columns_interaction{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 16px;
+    gap: 8px;
+    width: 100%;
+}
+
+.columns_interaction button{
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    background-color: rgb(57, 0, 97);
+    color: white;
+    border: 1px solid rgb(101, 0, 174);
+    font-weight: 500;
+}
+
+.columns_interaction button:hover{
+    background-color: rgb(101, 0, 174);
+}
+
+.columns_interaction button:disabled{
+    background-color: rgb(57, 0, 97);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    width: min(90vw, 600px);
+    aspect-ratio: 7 / 6;
+    padding: 16px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border: 3px solid rgb(101, 0, 174);
+    background-color: rgb(57, 0, 97);
+    gap: 16px;
+}
+
+.cell {
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    aspect-ratio: 1 / 1;
+}
+
+.cell.red {
+    background: red;
+}
+
+.cell.yellow {
+    background: gold;
+}
+
+@media (min-width: 1024px) {
+    .board{
+        max-width: 600px;
+        max-height: 600px;
+    }
+
+    .columns_interaction{
+        gap: 16px;
+    }
+
+    .columns_interaction button{
+        padding: 16px;
+    }
+}

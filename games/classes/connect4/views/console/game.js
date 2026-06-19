@@ -1,4 +1,4 @@
-import { ask } from "../../readline.js"
+import { ask } from "../../utils/readline.js"
 import { BoardView } from "./board.js"
 import { TurnView } from "./turn.js"
 import { ComputerPlayerView, UserPlayerView } from "./player.js"

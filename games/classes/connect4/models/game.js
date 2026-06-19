@@ -70,4 +70,7 @@ export class Game{
     getDraw() {
         return this.#draw
     }
+    getTurn() {
+        return this.#turn.getTurn()
+    }
 }

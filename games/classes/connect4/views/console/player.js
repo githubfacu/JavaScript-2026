@@ -1,5 +1,5 @@
-import { ask } from "../../readline.js";
-import { Board } from "../board.js";
+import { ask } from "../../utils/readline.js"
+import { Board } from "../../models/board.js"
 
 class PlayerView {
     player

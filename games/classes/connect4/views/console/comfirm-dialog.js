@@ -1,5 +1,5 @@
-import { ask } from "../../readline.js"
-import { ConfirmationDialog } from "../comfirm-dialog.js"
+import { ask } from "../../utils/readline.js"
+import { ConfirmationDialog } from "../../models/comfirm-dialog.js"
 
 export class ConfirmationDialogView{
     #dialog

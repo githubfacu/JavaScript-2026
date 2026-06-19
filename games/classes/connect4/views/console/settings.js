@@ -1,6 +1,5 @@
-
-import { GameSettings } from "../settings.js";
-import { ask } from "../../readline.js";
+import { ask } from "../../utils/readline.js"
+import { GameSettings } from "../../models/settings.js";
 
 export class SettingsView {
     #settings

@@ -1,11 +1,11 @@
-import { Game } from "./game.js";
-import { rl } from "../readline.js";
-import { GameSettings } from "./settings.js";
-import { ConfirmationDialogView } from "./views/comfirm-dialog.js";
-import { GameView } from "./views/game.js";
-import { SettingsView } from "./views/settings.js";
+import { rl } from "./utils/readline.js"
+import { ConfirmationDialogView } from "./views/console/comfirm-dialog.js"
+import { SettingsView } from "./views/console/settings.js"
+import { GameView } from "./views/console/game.js"
+import { Game } from "./models/game.js"
+import { GameSettings } from "./models/settings.js"
 
-class Connect4 {
+export class Connect4 {
 
     async start() {
         do {
