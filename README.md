@@ -1,6 +1,6 @@
 # JavaScript
 
-120 horas de JavaScript + diseño de software.
+120 horas de Diseño de software y JavaScript.
 
 - [Master ingeniería de software](https://escuela.it/masters)
 

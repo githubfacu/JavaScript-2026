@@ -66,13 +66,13 @@ body{
 
 .game_message{
     display: none;
-    padding: 12px;
+    padding: 8px;
     border-radius: 12px;
     font-weight: bold;
     color: white;
     border: 1px solid white;
     font-size: 400;
-    width: 150px;
+    min-width: 150px;
 }
 
 .reset_button{
